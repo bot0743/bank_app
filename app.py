@@ -123,6 +123,24 @@ def transfer():
 @app.cli.command('init-db')
 def init_db():
     db.create_all()
+        # Проверяем, есть ли уже тестовый пользователь
+    test_user = User.query.filter_by(username='test').first()
+    if not test_user:
+        # Создаём тестового пользователя
+        user = User(username='test', email='test@example.com')
+        user.set_password('123456')
+        # Генерируем номер счёта (копируем функцию из app.py)
+        import random, string
+        def generate_account_number():
+            return '40817810' + ''.join(random.choices(string.digits, k=12))
+        
+        account = Account(account_number=generate_account_number(), balance=1000.0)
+        user.account = account
+        db.session.add(user)
+        db.session.commit()
+        print('Тестовый пользователь создан: логин test, пароль 123456, баланс 1000')
+    else:
+        print('Тестовый пользователь уже существует')
     print('База данных инициализирована.')
 
 if __name__ == '__main__':
